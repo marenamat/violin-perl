@@ -8,6 +8,8 @@ use Violin;
 open F, "violin_data.csv" or die $!;
 my @data = (<F>);
 map { chomp $_; } @data;
+my $dsa = Violin::DataSet->new(data => [ @data ]);
+my $dsb = Violin::DataSet->new(data => [ map { $_ + (0.4 - rand) * 30 } @data ]);
+my $dsc = Violin::DataSet->new(data => [ map { $_ + (0.6 - rand) * 30 } @data ]);
 
-#Violin->plot("violin-test.png", @data);
-Violin->gnuplot("violin-test.png", @data);
+Violin->gnuplot("violin-test.png", $dsa, $dsb, $dsc);
