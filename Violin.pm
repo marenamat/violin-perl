@@ -24,7 +24,7 @@ atd('var', sub { $_[0]->qsum / $_[0]->n - $_[0]->mean**2; });
 atd('sd', sub { sqrt($_[0]->var); });
 atd('minrange', sub { $_[0]->min - $_[0]->sd; });
 atd('maxrange', sub { $_[0]->max + $_[0]->sd; });
-atd('width', sub { 1 / sqrt($_[0]->n); });
+atd('width', sub { 1.25 / sqrt($_[0]->n); });
 
 sub BUILD {
   my ($self) = @_;
@@ -36,25 +36,29 @@ sub func {
   my $where = shift;
   my $mul = shift;
   my $var = shift;
-  return "($mul*exp((-(t-($where))**2)/(2))/sqrt(2*pi))";
+  return "($mul*exp((-(t-($where))**2)/(2*$var))/sqrt(2*pi))";
 }
 
 sub dataset {
+  my $self = shift;
   my $pos = shift;
   my $args = shift;
   my $n = shift;
-  my @data = ($n > 1) ? @_[(@_/$n)..((($n-1)*(@_+1))/$n)] : @_;
+
+  my @alldata = @{$self->data};
+  my @data = ($n > 1) ? @alldata[(@alldata/$n)..((($n-1)*(@alldata+1))/$n)] : @alldata;
+
   return (
     Chart::Gnuplot::DataSet->new(
       func => {
-	x => (join "+", $pos, map { func($_, ($n-2)/($n*@_)) } @data),
+	x => (join "+", $pos, map { func($_, ($n-2)/($n*@alldata), $self->var/@alldata) } @data),
 	y => "t"
       },
       %$args,
     ),
     Chart::Gnuplot::DataSet->new(
       func => {
-	x => $pos . "-(" . (join "+", map { func($_, ($n-2)/($n*@_)) } @data) . ")",
+	x => $pos . "-(" . (join "+", map { func($_, ($n-2)/($n*@alldata), $self->var/@alldata) } @data) . ")",
 	y => "t"
       },
       %$args,
@@ -72,23 +76,23 @@ sub plot {
 
   return (
     # All points
-    dataset( $pos, {
+    $self->dataset( $pos, {
 	width => 2,
 	color => '#000000',
-      }, 1, @{$self->data} ),
+      }, 1),
     # 10->90 percentile
     (( @{$self->data} >= 10 ) ? (
-	dataset( $pos, {
+	$self->dataset( $pos, {
 	    width => 4,
 	    color => '#000000',
-	  }, 10, @{$self->data} )
+	  }, 10)
       ) : ()),
     # 25->75 percentile
     (( @{$self->data} >= 4 ) ? (
-	dataset( $pos, {
+	$self->dataset( $pos, {
 	    width => 4,
 	    color => '#666666',
-	  }, 4, @{$self->data} ),
+	  }, 4),
       ) : ()),
     # Mean point
     Chart::Gnuplot::DataSet->new(
