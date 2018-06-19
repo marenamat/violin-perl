@@ -10,12 +10,6 @@ has 'data' => (
   required => 1,
 );
 
-has 'width' => (
-  is => 'ro',
-  isa => 'Num',
-  default => 0.15,
-);
-
 sub atd($$) {
   has $_[0] => ( is => 'rw', isa => 'Num', lazy => 1, default => $_[1] );
 }
@@ -30,6 +24,7 @@ atd('var', sub { $_[0]->qsum / $_[0]->n - $_[0]->mean**2; });
 atd('sd', sub { sqrt($_[0]->var); });
 atd('minrange', sub { $_[0]->min - $_[0]->sd; });
 atd('maxrange', sub { $_[0]->max + $_[0]->sd; });
+atd('width', sub { 1 / sqrt($_[0]->n); });
 
 sub BUILD {
   my ($self) = @_;
