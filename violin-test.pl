@@ -19,9 +19,9 @@ sub dotest {
   Violin->gnuplot($file, $dsa, $dsb, $dsc);
 }
 
-dotest("test-std.png", @data);
-dotest("test-high.png", map { $_ * 1000; } @data);
-dotest("test-fifty.png", @data[0..50]);
-dotest("test-ten.png", @data[0..10]);
+dotest("test-std.eps", @data);
+dotest("test-high.eps", map { $_ * 1000; } @data);
+dotest("test-fifty.eps", @data[0..50]);
+dotest("test-ten.eps", @data[0..10]);
 
 

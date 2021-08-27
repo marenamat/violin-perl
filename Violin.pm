@@ -134,7 +134,7 @@ sub gnuplot {
   my @xrange = ( 0, $maxpos );
 
   my $chart = Chart::Gnuplot->new(
-    output => $file,
+    output => "$file",
     xrange => [ @xrange ],
     yrange => [ @trange ],
     trange => [ @trange ],
